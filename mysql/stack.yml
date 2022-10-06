@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: mysql:8.0.30
+    container_name: mysql8
+    command:
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+      --default-authentication-plugin=caching_sha2_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Jiuyukeji!@#123
+      TZ: Asia/Shanghai
+    ports:
+      - 3306:3306
+    volumes:
+      - /home/ecs-user/mysql/data:/var/lib/mysql
+      - /home/ecs-user/mysql/conf:/etc/mysql/conf.d

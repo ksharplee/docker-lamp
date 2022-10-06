@@ -1,0 +1,152 @@
+
+user  nginx;
+worker_processes  auto;
+
+error_log  /var/log/nginx/error.log notice;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /etc/nginx/conf.d/*.conf;
+
+    server {
+        listen       80;
+        server_name  localhost;
+
+        #charset koi8-r;
+
+        #access_log  logs/host.access.log  main;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        #error_page  404              /404.html;
+
+        # redirect server error pages to the static page /50x.html
+        #
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+
+        # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+        #
+        #location ~ \.php$ {
+        #    proxy_pass   http://127.0.0.1;
+        #}
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        #
+        #location ~ \.php$ {
+        #    root           html;
+        #    fastcgi_pass   127.0.0.1:9000;
+        #    fastcgi_index  index.php;
+        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+        #    include        fastcgi_params;
+        #}
+
+        # deny access to .htaccess files, if Apache's document root
+        # concurs with nginx's one
+        #
+        #location ~ /\.ht {
+        #    deny  all;
+        #}
+    }
+
+    server {
+        listen       80;
+        server_name  manager.singlesite.com;
+
+        location / {
+            proxy_pass http://localhost:8050/;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            proxy_pass http://localhost:8050/404;
+        }
+    }
+
+
+    server {
+        listen       80;
+        server_name  home.yiqibang.com;
+
+        location / {
+            proxy_pass http://localhost:8088/;
+        }
+
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            proxy_pass http://localhost:8088/404;
+        }
+    }
+
+    server {
+        listen       80;
+        server_name  api.localnext.com;
+
+        location / {
+            proxy_pass https://localhost:4000/graphql;
+        }
+    }
+
+    # server {
+    #    listen       443 ssl;
+    #    server_name  localhost;
+
+    #    ssl_certificate      E:\lizhenyu\website\localnext\localhost.pem;
+    #    ssl_certificate_key  E:\lizhenyu\website\localnext\localhost-key.pem;
+
+    #    ssl_session_cache    shared:SSL:1m;
+    #    ssl_session_timeout  5m;
+
+    #    ssl_ciphers  HIGH:!aNULL:!MD5;
+    #    ssl_prefer_server_ciphers  on;
+
+    #    location / {
+    #        proxy_pass https://localhost:4000/graphql;
+    #    }
+    # }
+
+    # server {
+    #    listen       443 ssl;
+    #    server_name  api.localnext.com;
+
+    #    ssl_certificate      E:\certs\api.localnext.com.pem;
+    #    ssl_certificate_key  E:\certs\api.localnext.com-key.pem;
+
+    #    ssl_session_cache    shared:SSL:1m;
+    #    ssl_session_timeout  5m;
+
+    #    ssl_ciphers  HIGH:!aNULL:!MD5;
+    #    ssl_prefer_server_ciphers  on;
+
+    #    location / {
+    #       proxy_pass https://localhost:4000/graphql;
+    #    }
+    # }
+}
