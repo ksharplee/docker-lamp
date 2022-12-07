@@ -20,3 +20,23 @@ services:
     volumes:
       - /home/ecs-user/mysql/data:/var/lib/mysql
       - /home/ecs-user/mysql/conf:/etc/mysql/conf.d
+
+  python3:
+    image: python:3.7.15-alpine
+    container_name: python3
+    restart: always
+
+  web:
+    image: php:apache
+    container_name: php-apache
+    depends_on:
+      - db
+    links:
+      - db
+      - python3
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - /var/www/website:/var/www/html
+      # - /home/ecs-user/php-apache/apache2:/etc/apache2
