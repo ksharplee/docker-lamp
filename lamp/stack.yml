@@ -21,22 +21,37 @@ services:
       - /home/ecs-user/mysql/data:/var/lib/mysql
       - /home/ecs-user/mysql/conf:/etc/mysql/conf.d
 
-  python3:
-    image: python:3.7.15-alpine
-    container_name: python3
+  # python3:
+  #   image: python:slim
+  #   container_name: python3
+  #   restart: always
+  #   stdin_open: true
+  #   tty: true
+  #   expose:
+  #     - "22"
+
+  memcached:
+    image: memcached:1.6
+    container_name: memcached
     restart: always
 
   web:
-    image: php:apache
+    build:
+      context: .
+      dockerfile: php-apache.dockerfile
+    image: php-apache
     container_name: php-apache
     depends_on:
       - db
+      - memcached
+      # - python3
     links:
       - db
-      - python3
+      # - python3
+      - memcached
     restart: always
     ports:
       - 80:80
     volumes:
       - /var/www/website:/var/www/html
-      # - /home/ecs-user/php-apache/apache2:/etc/apache2
+      - /home/ecs-user/php-apache/apache2:/etc/apache2
