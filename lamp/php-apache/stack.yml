@@ -1,7 +1,7 @@
 version: '3.1'
 
 services:
-
+  # https://hub.docker.com/_/mysql
   db:
     image: mysql:8.0.30
     container_name: mysql8
@@ -10,7 +10,7 @@ services:
       --collation-server=utf8mb4_general_ci
       --explicit_defaults_for_timestamp=true
       --lower_case_table_names=1
-      --default-authentication-plugin=caching_sha2_password
+      --default-authentication-plugin=mysql_native_password
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: Jiuyukeji!@#123
@@ -21,20 +21,13 @@ services:
       - /home/ecs-user/mysql/data:/var/lib/mysql
       - /home/ecs-user/mysql/conf:/etc/mysql/conf.d
 
-  # python3:
-  #   image: python:slim
-  #   container_name: python3
-  #   restart: always
-  #   stdin_open: true
-  #   tty: true
-  #   expose:
-  #     - "22"
-
+  # https://hub.docker.com/_/memcached
   memcached:
     image: memcached:1.6
     container_name: memcached
     restart: always
 
+  # https://hub.docker.com/_/php
   web:
     build:
       context: .
@@ -44,14 +37,14 @@ services:
     depends_on:
       - db
       - memcached
-      # - python3
     links:
       - db
-      # - python3
       - memcached
     restart: always
     ports:
       - 80:80
+      - 443:443
     volumes:
       - /var/www/website:/var/www/html
+      - /var/log/apache2/:/var/log/apache2/
       - /home/ecs-user/php-apache/apache2:/etc/apache2
